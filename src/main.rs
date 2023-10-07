@@ -12,8 +12,18 @@ use flowst::timer;
 
 use flowst::config::{load_timer, reset_timer, save_timer, TimerInfo};
 
+extern "system" {
+    fn SetStdHandle(nStdHandle: u32, hHandle: *mut ()) -> i32;
+}
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
+    use std::os::windows::io::AsRawHandle;
+    let error_log = r"D:\Log\error.txt";
+    let f = std::fs::File::create(error_log).unwrap();
+    unsafe {
+        SetStdHandle((-12_i32) as u32, f.as_raw_handle().cast())
+    };
     let args = parse_args();
 
     match &args.command {
